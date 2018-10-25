@@ -7,7 +7,9 @@
    public static final Map<String, WebSocketSession> userSocketSessionMap;
   
   //用来保存房间、用户,会话三者。使用双层Map实现对应关系。
-    public  static final Map<String, Map<String, WebSocketSession>> roomUserMap = new HashMap<>(3);
+   
+   public  static final Map<String, Map<String, WebSocketSession>> roomUserMap = new HashMap<>(3);
+    
     //将玩家位置和玩家userId放入positionUserMap,之所以为LinkedHashMap，是因为要能够按照添加顺序顺序输出
     public static final Map<String, PlayerPosition> userPositionMap=new LinkedHashMap<String, PlayerPosition>();
     //将每个玩家的用户名和该玩家的牌堆放到userDeckMap中去
