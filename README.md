@@ -24,6 +24,7 @@
 chatroom.java里边的ShuffleDeck方法：房主点击洗牌跳转到该方法中
  
  @RequestMapping("ShuffleDeck")
+	
 	@ResponseBody
 	public String ShuffleDeck(HttpServletRequest request) throws IOException {
    
@@ -31,6 +32,7 @@ chatroom.java里边的ShuffleDeck方法：房主点击洗牌跳转到该方法�
 chatroom.java里边的CallContract方法：叫牌
  
  @RequestMapping("CallContract")
+	
 	@ResponseBody
 	public String CallContract(HttpServletRequest request) throws IOException {
    
@@ -39,6 +41,7 @@ chatroom.java里边的CallContract方法：叫牌
 PlayGame.java中的start方法：玩家开始游戏前的准备,确定好将牌，定约，庄家,其中庄家在定约中有定义
  
  @RequestMapping("start")
+	
 	@ResponseBody
 	public String start(HttpServletRequest request) {
   
@@ -47,6 +50,7 @@ PlayGame.java中的start方法：玩家开始游戏前的准备,确定好将牌�
 PlayGame.java中的play方法：四个玩家打牌，通过发牌跳转到该方法，将数据传递到后台
   
   @RequestMapping("play")
+	
 	@ResponseBody
 	public String play(HttpServletRequest request) {
   
