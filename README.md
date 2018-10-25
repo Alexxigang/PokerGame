@@ -8,12 +8,10 @@
   
   //用来保存房间、用户,会话三者。使用双层Map实现对应关系。
     public  static final Map<String, Map<String, WebSocketSession>> roomUserMap = new HashMap<>(3);
-
     //将玩家位置和玩家userId放入positionUserMap,之所以为LinkedHashMap，是因为要能够按照添加顺序顺序输出
     public static final Map<String, PlayerPosition> userPositionMap=new LinkedHashMap<String, PlayerPosition>();
     //将每个玩家的用户名和该玩家的牌堆放到userDeckMap中去
-    public static final Map<String,Deck> userDeckMap=new HashMap<String,Deck>(); 
-    
+    public static final Map<String,Deck> userDeckMap=new HashMap<String,Deck>();   
     //将每个房间的定约保存在roomContractMap
     public static final Map<String,Contract> roomContractMap=new HashMap<String,Contract>();
     //将每个房间的将牌保存在roomTrumpMap中
@@ -22,12 +20,14 @@
  deckOfCard.java:定义四个方位的玩家，洗牌并将每个玩家的牌进行排序
  
 chatroom.java里边的ShuffleDeck方法：房主点击洗牌跳转到该方法中
+ 
  @RequestMapping("ShuffleDeck")
 	@ResponseBody
 	public String ShuffleDeck(HttpServletRequest request) throws IOException {
    
   }
 chatroom.java里边的CallContract方法：叫牌
+ 
  @RequestMapping("CallContract")
 	@ResponseBody
 	public String CallContract(HttpServletRequest request) throws IOException {
@@ -35,13 +35,15 @@ chatroom.java里边的CallContract方法：叫牌
   }
 
 PlayGame.java中的start方法：玩家开始游戏前的准备,确定好将牌，定约，庄家,其中庄家在定约中有定义
-  @RequestMapping("start")
+ 
+ @RequestMapping("start")
 	@ResponseBody
 	public String start(HttpServletRequest request) {
   
   }
   
 PlayGame.java中的play方法：四个玩家打牌，通过发牌跳转到该方法，将数据传递到后台
+  
   @RequestMapping("play")
 	@ResponseBody
 	public String play(HttpServletRequest request) {
