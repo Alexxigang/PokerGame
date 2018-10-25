@@ -58,6 +58,6 @@ PlayGame.java中的play方法：四个玩家打牌，通过发牌跳转到该方
   
 utils包里的MapSessionControll.java中的sendDeck方法：/将不同位置的玩家的牌发给对应的玩家,并将对应的牌堆放入到userDeckMap中去
 
-对陶荆杰的PokerCommunicator.java的改动：将javax.websocket.Session换成了spring的websocketsession,sendtext方法改为了sendmessage()方法，并且里边的参数改为了TextMessage格式，实际上没有影响
+对组长陶荆杰的PokerCommunicator.java的改动：将javax.websocket.Session换成了spring的websocketsession,sendtext方法改为了sendmessage()方法，并且里边的参数改为了TextMessage格式，实际上没有影响
 
 更加详细的解释见代码注释
