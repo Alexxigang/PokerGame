@@ -1,8 +1,11 @@
 # PokerGame
 洗牌，发牌，叫牌以及打牌模块（主要参考controller包和util包）
+
 这里在MyWebSocketSession.java中定义了6个静态map
+   
    //保存在线用户的会话通道
    public static final Map<String, WebSocketSession> userSocketSessionMap;
+  
   //用来保存房间、用户,会话三者。使用双层Map实现对应关系。
     public  static final Map<String, Map<String, WebSocketSession>> roomUserMap = new HashMap<>(3);
 
