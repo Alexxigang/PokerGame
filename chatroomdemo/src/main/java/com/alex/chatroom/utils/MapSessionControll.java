@@ -9,6 +9,7 @@ import org.springframework.web.socket.WebSocketSession;
 import com.alex.chatroom.websocket.MyWebSocketHandler;
 import com.poker.PokerCommunicator;
 
+import bridge.domain.CallContract;
 import bridge.domain.PlayerPosition;
 
 @Component
@@ -45,5 +46,41 @@ public class MapSessionControll {
 			}
 		}
 		
+	}
+	//将叫品放入callcontractList，
+	//判断有没有连续三次出现非实质性叫品，如果有，则通知玩家叫品结束，并将最高叫品发给玩家（最后出的叫品即为最高叫品）
+	public boolean findendOfCall() {
+				int flag=0;
+				for(int i=socketHandler.callcontractList.size()-1;i>=socketHandler.callcontractList.size()-3;i--) {
+					//将该叫品序列集合从后往前倒序遍历四个元素，以flag标记非实质性叫品个数
+					if(socketHandler.callcontractList.get(i).meaningful==false) {
+						flag++;
+					}
+				}
+				if(flag==3)//如果找到连续三个非实质性叫品，则返回true
+					return true;
+				return false;
+	}
+	//这里找出最后的叫品
+	public int findHighestCall() {
+		int loc=-1;
+		for(int i=socketHandler.callcontractList.size()-1;i>=0;i--) {
+			//找出最后加进去的实质性叫品的位置
+			if(socketHandler.callcontractList.get(i).meaningful==true) {
+				loc=i;
+				break;
+			}
+		}
+		return loc;
+	}
+	//通过map值获取键
+	public static Object findkey(Map map,Object value) {
+		Object key=new Object();
+		for(Object key1: map.keySet()){
+	        if(map.get(key).equals(value)){
+	        	key=key1;
+	        }
+	    }
+		return key;
 	}
 }
