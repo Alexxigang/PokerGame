@@ -58,7 +58,9 @@ public class PokerCommunicator {
 		sender.sendMessage(new TextMessage(position.getFullName().substring(0, 1)));
 	}
 	public void send(Card card) throws IOException{//向对应玩家发送其他玩家出的牌的方法
-		sender.sendMessage(new TextMessage(card.getSuit().getShortName()+card.getRank().toString()));
+		String cardtoJson=new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(card);
+		//sender.sendMessage(new TextMessage(card.getSuit().getShortName()+card.getRank().toString()));
+		sender.sendMessage(new TextMessage(cardtoJson));
 	}
 	
 	public void send(CallContract contract)  throws IOException{
