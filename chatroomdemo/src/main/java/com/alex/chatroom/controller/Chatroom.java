@@ -129,8 +129,10 @@ public class Chatroom {
 	@RequestMapping("CallContract")
 	@ResponseBody
 	public String CallContract(HttpServletRequest request) throws IOException {
+		String isend="0";//用来标记叫品是否结束,为"1"则结束，发送给前台
 		//从前台获取到用户所在的房间名和用户名来获取用户所在的websocketsession,从而获得pokercomunicator构造函数参数进行创建
-		String roomName = request.getParameter("roomname");
+		//String roomName = request.getParameter("roomname");
+		String roomName="武大";
 		String uid = request.getParameter("userId");
 		WebSocketSession session = socketHandler.roomUserMap.get(roomName).get(uid);
 		PokerCommunicator pokercommunicator=new PokerCommunicator(session);
@@ -141,12 +143,21 @@ public class Chatroom {
 		CallContract callcontract;
 		if(calltype==null) {//如果是非实质性叫品
 			callcontract=new CallContract(contract);
-		}else {//如果是非实质性叫品
+		}else {//如果是实质性叫品
 			PlayerPosition playerposition=socketHandler.userPositionMap.get(uid);
 			callcontract=new CallContract(Integer.parseInt(calltype),playerposition);
 		}
-		//发送该叫品给所有玩家
-		pokercommunicator.send(contract);
-		return "1";
+		//将叫品放入callcontractList
+		socketHandler.callcontractList.add(callcontract);
+		//发送该叫品显示给玩家
+		pokercommunicator.send(callcontract);
+		if(mapsessioncontroll.findendOfCall()) {
+			//如果出现连续三次非实质性叫品，则通知玩家叫品结束，并将最高叫品发给玩家（最后出的叫品即为最高叫品）
+			int loc=mapsessioncontroll.findHighestCall();
+			CallContract highcallcontract=socketHandler.callcontractList.get(loc);
+			pokercommunicator.send(highcallcontract);
+			isend="1";
+		}
+		return isend;
 	}
 }
