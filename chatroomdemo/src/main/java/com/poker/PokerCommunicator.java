@@ -13,6 +13,8 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.google.gson.GsonBuilder;
+
 import bridge.domain.CallContract;
 import bridge.domain.Card;
 import bridge.domain.Deck;
@@ -31,9 +33,11 @@ public class PokerCommunicator {
 	
 	public void send(Deck deck)  throws IOException{
 		/**
-		 * 将玩家手牌信息发给该玩家的方法
+		 * 将玩家手牌信息发给该玩家的方法，这里先转换为json格式再发送
 		 */
-		sender.sendMessage(new TextMessage(BridgeHelper.deckToPBNHand(deck)));
+		//sender.sendMessage(new TextMessage(BridgeHelper.deckToPBNHand(deck)));
+		String decktoJson=new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(deck);
+		sender.sendMessage(new TextMessage(decktoJson));
 	}
 	public boolean sendtoUser(WebSocketSession session,Deck deck) throws IOException {
 		/**
@@ -59,9 +63,10 @@ public class PokerCommunicator {
 	
 	public void send(CallContract contract)  throws IOException{
 		/**
-		 * 发送玩家叫品的方法
+		 * 发送玩家叫品的方法，这里先转换为json格式再传参
 		 */
-		sender.sendMessage(new TextMessage(contract.getShortString()));
+		String contracttoJson=new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(contract);
+		sender.sendMessage(new TextMessage(contracttoJson));
 	}
 	
 
