@@ -2,10 +2,12 @@ package com.alex.chatroom.websocket;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -23,12 +25,14 @@ import com.alex.chatroom.pojo.Message;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import bridge.domain.CallContract;
 import bridge.domain.Card;
 import bridge.domain.Contract;
 import bridge.domain.Deck;
 import bridge.domain.PlayerPosition;
 import bridge.domain.Rank;
 import bridge.domain.Suit;
+import bridge.domain.Trick;
 import bridge.domain.Trump;
 
 /*
@@ -56,6 +60,11 @@ public class MyWebSocketHandler implements WebSocketHandler {
     public static final Map<String,Contract> roomContractMap=new HashMap<String,Contract>();
     //将每个房间的将牌保存在roomTrumpMap中
     public static final Map<String,Trump> roomTrumpMap=new HashMap<String, Trump>();
+    //这里对应的是只有一个房间，如果有多个房间还要将该list作为roomCallcontractMap的值来存储
+    //存储玩家发送的叫品
+    public static final List<CallContract> callcontractList=new ArrayList<>();
+    //将与房间对应的每一墩的牌堆放入roomTrckMap中
+    public static final Map<String,Trick> roomTrickMap=new LinkedHashMap<String,Trick>(); 
     //存储所有的在线用户
     static {
         userSocketSessionMap = new HashMap<String, WebSocketSession>();
@@ -86,7 +95,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
 	        }
 	        //将对应房间里对应的用户从房间里移除
 	        String uid = (String) webSocketSession.getHandshakeAttributes().get("uid");
-	        String roomName = (String) webSocketSession.getHandshakeAttributes().get("roomName");
+	        //String roomName = (String) webSocketSession.getHandshakeAttributes().get("roomName");
+	        String roomName="武大";//这里先同意把房间规定成武大
 	        Map<String, WebSocketSession> mapSession = roomUserMap.get(roomName);
 	        mapSession.remove(uid);
 	        
@@ -103,7 +113,9 @@ public class MyWebSocketHandler implements WebSocketHandler {
 	            userSocketSessionMap.put(uid, webSocketSession);
 	        }
 	        //取得房间名
-	        String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
+	        //String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
+	        //这里先把房间名规定成武大
+	        String roomName="武大";
 	        //从对应房间名中取得会话
 	        Map<String, WebSocketSession> mapSession = roomUserMap.get(roomName);
             if (mapSession == null) {
@@ -176,7 +188,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
 			webSocketSession.close();
 		}
 		//取得房间名
-        String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
+        //String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
+		String roomName="武大";
 		roomUserMap.get(roomName).remove(webSocketSession.getId());
 		userSocketSessionMap.remove(webSocketSession.getId());
 	}
@@ -234,9 +247,5 @@ public class MyWebSocketHandler implements WebSocketHandler {
         return allSendSuccess;  
     }
 
-    //将某房间的奖牌放入roomTrumpMap中
-    /*public boolean putTrump(String roomName,Trump trump) {
-    	//this.roomTrumpMap.put(roomName, trump);
-    	return true;
-    }*/
+    
 }
