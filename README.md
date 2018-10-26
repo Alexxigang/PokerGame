@@ -24,7 +24,7 @@
     public static final Map<String,Trick> roomTrickMap=new LinkedHashMap<String,Trick>(); 
     先把房间名规定为"武大"
     
- deckOfCard.java:定义四个方位的玩家，洗牌并将每个玩家的牌进行排序
+deckOfCard.java:定义四个方位的玩家，洗牌并将每个玩家的牌进行排序
  
 chatroom.java里边的ShuffleDeck方法：房主点击洗牌跳转到该方法中
  
@@ -43,7 +43,7 @@ chatroom.java里边的CallContract方法：叫牌
 	
 	@ResponseBody
 	public String CallContract(HttpServletRequest request) throws IOException {
-	//从前台获取叫品，判断是否为是指向叫品，通过pokercomunicator方法发送该叫品，这里可以通过参数构造该叫品
+	        //从前台获取叫品，判断是否为是指向叫品，通过pokercomunicator方法发送该叫品，这里可以通过参数构造该叫品
 		String calltype=request.getParameter("calltype");
 		//将叫品放入callcontractList
 		socketHandler.callcontractList.add(callcontract);
@@ -73,7 +73,7 @@ PlayGame.java中的play方法：四个玩家打牌，通过发牌跳转到该方
 	
 	@ResponseBody
 	public String play(HttpServletRequest request) {
-	// 根据玩家位置和该玩家的纸牌创建牌桌状态
+	        // 根据玩家位置和该玩家的纸牌创建牌桌状态
 		getGameState.put(playerposition, deck);
 		//判断是否为第一个出牌的，如果是第一个出牌的，则把明手的牌发给所有玩家
 		if(bridgegame.getCardsRemaining()==0) {
