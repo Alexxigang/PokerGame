@@ -36,18 +36,19 @@ public class PlayGame {
 
 	private BridgeGame bridgegame;
 
-	@RequestMapping("start")
+	/*@RequestMapping("start")
 	@ResponseBody
 	public String start(HttpServletRequest request) {
 		// 玩家开始游戏前的准备,确定好将牌，定约，庄家,其中庄家在定约中有定义
-		String roomName = request.getParameter("roomname");
+		//String roomName = request.getParameter("roomname");
+		String roomName="武大";
 		// 将前台传入的数据转化为Trump对象 ->Trump
 		Trump trump = new Gson().fromJson(request.getParameter("trump"), Trump.class);
 		Contract contract = new Gson().fromJson(request.getParameter("contract"), Contract.class);
 		socketHandler.roomTrumpMap.put(roomName, trump);
 		socketHandler.roomContractMap.put(roomName, contract);
 		return "1";
-	}
+	}*/
 
 	@RequestMapping("play")
 	@ResponseBody
@@ -97,7 +98,7 @@ public class PlayGame {
 		PlayerPosition nextplayer=bridgegame.playCard(card, playerposition);
 		pokercommunicator.send(nextplayer);
 		//最终将玩家打出去的牌从玩家手中移除
-		deck.removeCard(card);
+		//deck.removeCard(card);
 		return "1";
 	}
 }
