@@ -156,6 +156,8 @@ public class Chatroom {
 			int loc=mapsessioncontroll.findHighestCall();
 			CallContract highcallcontract=socketHandler.callcontractList.get(loc);
 			pokercommunicator.send(highcallcontract);
+			//保存定约
+			socketHandler.roomContractMap.put(roomName, highcallcontract);
 			isend="1";
 		}
 		return isend;
