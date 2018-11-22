@@ -1,11 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.alex.project</groupId>
+  <groupId>com.alex</groupId>
   <artifactId>chatroomdemo</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
   <name>chatroomdemo</name>
   <description>聊天室的demo</description>
+  <url>http://maven.apache.org</url>
   <properties>  
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -46,20 +47,20 @@
 <!--http://localhost:8080/manager/stop?path=/ //停止 -->                                                                                <!--http://localhost:8080/manager/start?path=/ //启动 -->
 <!--http://localhost:8080/manager/text/deploy?path=/ //部署 -->
 <!--http://localhost:8080/manager/text/undeploy?path=/ //卸载 -->
-        <!--  <url>http://39.108.114.158:8080/manager/text</url>--><!-- 远程服务器url地址 -->
-        <!--<server>tomcat7</server> --> <!-- setting.xml 的server id-->
-        <!--<username>tomcat</username>--><!-- tomcat-user.xml 的 username -->
-        <!--<password>tomcat</password>--><!-- tomcat-user,xml 的 password -->
+          <url>http://114.115.181.114:8080/manager/text</url><!-- 远程服务器url地址 -->
+        <server>tomcat7</server>  <!-- setting.xml 的server id-->
+        <username>tomcat</username><!-- tomcat-user.xml 的 username -->
+        <password>tomcat</password><!-- tomcat-user,xml 的 password -->
          <!-- 重新部署时更新-->
-        <!--<update>true</update>-->
+        <update>true</update>
 		<!-- 端口 -->
 		<port>8080</port>
 		<!-- 访问路径 -->
 		<path>/chatroom</path>
 		<!-- 编码 -->
 		<uriEncoding>utf-8</uriEncoding>
-		<finalName>chatroom</finalName>
-		<server>tomcat7</server>
+		<!--  <finalName>chatroom</finalName>
+		<server>tomcat7</server>-->
 	</configuration>
 </plugin>
 <!-- 忽略项目中测试错误，在发布过程中会运行项目中的测试代码-->
@@ -136,7 +137,11 @@
             <artifactId>spring-core</artifactId>  
             <version>${spring.version}</version>  
         </dependency>  
-  
+   <dependency>
+            <groupId>net.java.dev.jna</groupId>
+            <artifactId>jna</artifactId>
+            <version>5.0.0</version>
+        </dependency>
         <dependency>  
             <groupId>org.springframework</groupId>  
             <artifactId>spring-web</artifactId>  
