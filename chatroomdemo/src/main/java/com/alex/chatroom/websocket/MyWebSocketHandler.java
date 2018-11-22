@@ -24,6 +24,11 @@ import org.springframework.web.socket.WebSocketSession;
 import com.alex.chatroom.pojo.Message;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.poker.ExitRoom;
+import com.poker.PokerCommunicator;
+import com.poker.PokerRoom;
+import com.poker.RoomManager;
+import com.poker.User;
 
 import bridge.domain.CallContract;
 import bridge.domain.Card;
@@ -46,8 +51,6 @@ public class MyWebSocketHandler implements WebSocketHandler {
 	//@Autowired
     //private youandmeService youandmeService;
 	//在线用户的SOCKETsession(存储了所有的通信通道）
-	//当MyWebSocketHandler类被加载时就会创建该Map，随类而生
-    public static final Map<String, WebSocketSession> userSocketSessionMap;
   //用来保存房间、用户,会话三者。使用双层Map实现对应关系。
     public  static final Map<String, Map<String, WebSocketSession>> roomUserMap = new HashMap<>(3);
 
@@ -62,13 +65,12 @@ public class MyWebSocketHandler implements WebSocketHandler {
     public static final Map<String,Trump> roomTrumpMap=new HashMap<String, Trump>();
     //这里对应的是只有一个房间，如果有多个房间还要将该list作为roomCallcontractMap的值来存储
     //存储玩家发送的叫品
-    public static final List<CallContract> callcontractList=new ArrayList<>();
+   // public static final List<CallContract> callcontractList=new ArrayList<>();
     //将与房间对应的每一墩的牌堆放入roomTrckMap中
     public static final Map<String,Trick> roomTrickMap=new LinkedHashMap<String,Trick>(); 
-    //存储所有的在线用户
-    static {
-        userSocketSessionMap = new HashMap<String, WebSocketSession>();
-    }
+    /*此处定义与用户绑定的私有属性*/
+    // private 
+     public static final Map<String, User> userSocketSessionMap=new HashMap<>();//修改原静态map为id与User对应map，防止重复id
     
     /**
      * 在此刷新页面就相当于断开WebSocket连接,原本在静态变量userSocketSessionMap中的
@@ -85,20 +87,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
 	public void afterConnectionClosed(WebSocketSession webSocketSession, CloseStatus closeStatus) throws Exception {
 		// TODO Auto-generated method stub
 		 System.out.println("WebSocket:"+webSocketSession.getHandshakeAttributes().get("uid")+"close connection");
-	        Iterator<Map.Entry<String,WebSocketSession>> iterator = userSocketSessionMap.entrySet().iterator();
-	        while(iterator.hasNext()){
-	            Map.Entry<String,WebSocketSession> entry = iterator.next();
-	            if(entry.getValue().getHandshakeAttributes().get("uid")==webSocketSession.getHandshakeAttributes().get("uid")){
-	                userSocketSessionMap.remove(webSocketSession.getHandshakeAttributes().get("uid"));
-	                System.out.println("WebSocket in staticMap:" + webSocketSession.getHandshakeAttributes().get("uid") + "removed");
-	            }
-	        }
-	        //将对应房间里对应的用户从房间里移除
-	        String uid = (String) webSocketSession.getHandshakeAttributes().get("uid");
-	        //String roomName = (String) webSocketSession.getHandshakeAttributes().get("roomName");
-	        String roomName="武大";//这里先同意把房间规定成武大
-	        Map<String, WebSocketSession> mapSession = roomUserMap.get(roomName);
-	        mapSession.remove(uid);
+		//将用户数据从房间中清理掉
+	        exitRoom(webSocketSession);
 	        
 	}
 
@@ -108,41 +98,30 @@ public class MyWebSocketHandler implements WebSocketHandler {
 	@Override
 	public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
 		// TODO Auto-generated method stub
-		 String uid = (String) webSocketSession.getHandshakeAttributes().get("uid");
-	        if (userSocketSessionMap.get(uid) == null) {
-	            userSocketSessionMap.put(uid, webSocketSession);
-	        }
+		 String uid = (String) webSocketSession.getHandshakeAttributes().get("uid");//检测用户名是否已出现
+	     User user = new User(uid, webSocketSession);
+	     if (userSocketSessionMap.get(uid) == null) {
+	            userSocketSessionMap.put(uid, user);
+	     }
 	        //取得房间名
-	        //String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
-	        //这里先把房间名规定成武大
-	        String roomName="武大";
-	        //从对应房间名中取得会话
-	        Map<String, WebSocketSession> mapSession = roomUserMap.get(roomName);
-            if (mapSession == null) {
-            	//如果没有对应房间名，则新建一个房间
-                mapSession = new HashMap<>(3);
-                roomUserMap.put(roomName, mapSession);
+	        String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
+	        //根据对应房间名查找房间
+	        PokerRoom room=RoomManager.findRoom(roomName);
+	        boolean success=room.add(user);//将用户加入房间
+	       //检测是否添加成功
+            if(!success) {
+            	System.out.println("加入失败");
+            	webSocketSession.close();
+            }else {//未满时将玩家位置发给客户端
+            	//webSocketSession.sendMessage(new TextMessage(userPositionMap.get(uid)));
+            	PokerCommunicator communicator=new PokerCommunicator(webSocketSession);
+            	webSocketSession.getHandshakeAttributes().put("room", room);//将房间加session参数中
+            	PlayerPosition position=room.findPosition(user.getUserId());
+            	communicator.send(position);
+            	
             }
-            mapSession.put(uid, webSocketSession);//将该用户->会话放入对应房间中
-            //对房间人数进行判断，按照玩家加入房间的顺序依次添加到北东南西的位置
-            if(mapSession.size()==1) {
-            	userPositionMap.put(uid, PlayerPosition.NORTH);
-            }else if(mapSession.size()==2) {
-            	userPositionMap.put(uid, PlayerPosition.EAST);
-            }else if(mapSession.size()==3) {
-            	userPositionMap.put(uid, PlayerPosition.SOUTH);
-            }else if(mapSession.size()==4) {
-            	userPositionMap.put(uid, PlayerPosition.WEST);
-            }
-            //房间内最多只能为4个人，做判断
-            if(mapSession.size()==5) {
-            	System.out.println("当前房间人数已满，请进入其他房间或新建房间");
-            	mapSession.remove(uid);
-            }
-            System.out.println("当前房间在线人数为:"+mapSession.size()+"人");
-	        // 这块会实现自己业务，比如，当用户登录后，会把离线消息推送给用户  
-	         //TextMessage returnMessage = new TextMessage("你将收到的离线");  
-	         //webSocketSession.sendMessage(returnMessage); 
+            System.out.println("当前房间在线人数为:"+room.size()+"人");
+	        
 	}
     /*
      * 
@@ -157,25 +136,20 @@ public class MyWebSocketHandler implements WebSocketHandler {
 		// TODO Auto-generated method stub
 		 //if(webSocketMessage.getPayload()==0)return;
 
-	        //得到Socket通道中的数据并转化为Message对象  ->pojo.Message
-	        Message msg=new Gson().fromJson(webSocketMessage.getPayload().toString(),Message.class);
-
-	        Timestamp now = new Timestamp(System.currentTimeMillis());
-	        msg.setMessageDate(now);
-	        //处理HTML的字符，转义
-	        String messageText=msg.getMessageText();
-	        System.out.println("用户输入："+messageText);
-	        //将信息保存至数据库
-	        //youandmeService.addMessage(msg.getFromId(),msg.getFromName(),msg.getToId(),msg.getMessageText(),msg.getMessageDate());
-            //判断单发还是群发
-	        if(msg.getToId()==null||msg.getToId().equals("")||msg.getToId().equals("-1")) {
-	        	//群发消息
-		        sendMessageToAll(msg.getRoomName(),new TextMessage(new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(msg)));
-	        }else {
-	        	//单发
-	        	 //发送Socket信息，一个用户在客户端发送消息，服务端在socket通道中接收到该消息之后将该消息发送给指定的连接到该socket的用户
-		        sendMessageToUser(msg.getRoomName(),msg.getToId(), new TextMessage(new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(msg)));
-	        }
+	      //得到Socket通道中的数据并转化为Message对象  ->pojo.Message
+			String message=webSocketMessage.getPayload().toString();
+			System.out.println(webSocketSession.getId());
+			if(message.equals("java.nio.HeapByteBuffer[pos=0 lim=0 cap=0]")){
+				/*byte[] bs = new byte[1];
+				bs[0] = 'i';
+				ByteBuffer byteBuffer = ByteBuffer.wrap(bs);
+				PingMessage pingMessage = new PingMessage(byteBuffer);
+				webSocketSession.sendMessage(pingMessage);*/
+				System.out.println("已收到一个pong包：【" + message + "】");
+			}else {//消息提交给对应房间处理
+				((PokerRoom)(webSocketSession.getHandshakeAttributes().get("room"))).handelMessage(webSocketSession, message);
+				
+			}
 	        
 	}
 
@@ -187,11 +161,10 @@ public class MyWebSocketHandler implements WebSocketHandler {
 		if(webSocketSession.isOpen()) {
 			webSocketSession.close();
 		}
-		//取得房间名
-        //String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
-		String roomName="武大";
-		roomUserMap.get(roomName).remove(webSocketSession.getId());
-		userSocketSessionMap.remove(webSocketSession.getId());
+		//将用户数据从房间中清理掉
+		    exitRoom(webSocketSession);
+	        System.out.println("websocketsession.getId():"+webSocketSession.getId());
+		//userSocketSessionMap.remove(webSocketSession.getId());
 	}
 
 	@Override
@@ -247,5 +220,34 @@ public class MyWebSocketHandler implements WebSocketHandler {
         return allSendSuccess;  
     }
 
+    public void exitRoom(WebSocketSession webSocketSession) {
+		Iterator<Map.Entry<String,User>> iterator = userSocketSessionMap.entrySet().iterator();
+        while(iterator.hasNext()){
+            Map.Entry<String,User> entry = iterator.next();
+            if(entry.getValue().getSession().getHandshakeAttributes().get("uid")==webSocketSession.getHandshakeAttributes().get("uid")){
+                User user=userSocketSessionMap.get(webSocketSession.getHandshakeAttributes().get("uid"));
+                PokerRoom room=user.getRoom();//根据该用户获取所在房间
+                if(!(user.getUserId().equals(room.getHostId()))){//如果该玩家不是房主
+                	room.getPlayers().remove(user);
+                	System.out.println("remove players");
+                	room.removePositionMap(user);//将该玩家从positionMap中移除
+                	System.out.println("remove users");
+                }else {//若是房主，还要移除userMap中对应hostId的键值对，移除roomMap对应roomId的键值对来销毁该房间，
+                	//因为新进来的房主会调用createroom方法来查找roomMap中的roomId存不存在
+                	//还有一个问题，因为该房间是以hostId构造的，所以要不要将该hostId置空，也可以不变，后面新进来的房主还是会设置该房间hostId
+                	 //取得房间名
+        	        String roomName= (String) webSocketSession.getHandshakeAttributes().get("roomName");
+        	        RoomManager.removeMap(user, roomName);//将该房主和房间从对应map中移除;
+        	        room.getPlayers().remove(user);
+        	        System.out.println("remove players");
+                	room.removePositionMap(user);//将该玩家从positionMap中移除
+                	System.out.println("remove playerpoition");
+                }
+                iterator.remove();//改为该remove不会抛出异常，同步modCount和expectedModCount
+            	//userSocketSessionMap.remove(webSocketSession.getHandshakeAttributes().get("uid"));
+                System.out.println("WebSocket in staticMap:" + webSocketSession.getHandshakeAttributes().get("uid") + "removed");
+            }
+	}
+}
     
 }
