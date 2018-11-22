@@ -24,7 +24,6 @@ import org.springframework.web.socket.WebSocketSession;
 import com.alex.chatroom.pojo.Message;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.poker.ExitRoom;
 import com.poker.PokerCommunicator;
 import com.poker.PokerRoom;
 import com.poker.RoomManager;
