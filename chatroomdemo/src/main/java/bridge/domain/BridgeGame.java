@@ -99,4 +99,7 @@ public class BridgeGame {
     public int getEastWestTricksMade() {// 获得东西得到的墩数。
         return Integer.parseInt(String.valueOf(tricks.stream().filter(trick -> trick.getTrickWinner().equals(PlayerPosition.EAST) || trick.getTrickWinner().equals(PlayerPosition.WEST)).count()));
     }
+    public void setContract(Contract contract) {
+    	this.contract=contract;
+    }
 }
