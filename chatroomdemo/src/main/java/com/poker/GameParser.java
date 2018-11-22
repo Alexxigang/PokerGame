@@ -72,4 +72,11 @@ public class GameParser {
 		
 		return cards;
 	}
+	public static String fitMessage(CallContract message) {
+		return message.getShortString();
+	}
+	
+	public static String fitMessage(Card message) {
+		return Character.toString(message.getSuit().getShortName())+message.getRank().getScore();
+	}
 }
