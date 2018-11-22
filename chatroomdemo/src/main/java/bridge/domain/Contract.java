@@ -46,6 +46,10 @@ public class Contract {
         trump = Trump.NO_TRUMP;
     }
 
+     public Contract(PlayerPosition player, int i, Trump trump2) {
+		// TODO Auto-generated constructor stub
+    	
+	}
     public String getShortString()
     {
         return playerPosition.getFirstLetter() + ":" + Integer.toString(value) + trump.getShortName();
