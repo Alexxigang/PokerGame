@@ -21,6 +21,8 @@ import com.alex.chatroom.websocket.MyWebSocketHandler;
 import com.google.gson.GsonBuilder;
 import com.poker.GameParser;
 import com.poker.PokerCommunicator;
+import com.poker.PokerRoom;
+import com.poker.RoomManager;
 
 import bridge.domain.CallContract;
 import bridge.domain.Card;
@@ -44,23 +46,16 @@ public class Chatroom {
 		request.getSession().setAttribute("roomName", roomName);
 		// 将房主标记保存到session中
 		String ishost = request.getParameter("roomchoice");
-		System.out.println(ishost + "房主？");
-		request.getSession().setAttribute("ishost", ishost);
 		// 从创建房间页面中获取userId
 		String userId = request.getParameter("userId");
-		// 从对应房间名中取得会话
-		@SuppressWarnings("static-access")
-		Map<String, WebSocketSession> mapSession = socketHandler.roomUserMap.get(roomName);
-		// WebSocketSession websocketsession=mapSession.get(userId);
-		if (mapSession != null) {
-			int roomsize = mapSession.size();
-			System.out.println(roomsize + "人");
-			request.getSession().setAttribute("roomsize", roomsize);
-			socketHandler.sendMessageToAll(request.getParameter("roomName"),
-					new TextMessage("这是给所有用户发送的消息，来自controller"));
-		} else {
-			System.out.println("房间为空");
+		if(ishost!=null&&ishost.equals("1")) {//选项为创建房间时进行创建房间操作
+			Boolean success=RoomManager.creatRoom(userId, roomName);
+			if(!success) return "createOrenterRoom";//如果房间已存在，则跳转到创建房间页面重新创建房间
+		}else {
+			PokerRoom room=RoomManager.findRoom(roomName);//如果是进入房间选项，则查找房间
+			if(room==null) return "createOrenterRoom";//如果找不到房间，则重新创建房间
 		}
+		request.getSession().setAttribute("ishost", ishost);
 		return "chat";
 	}
 
@@ -74,20 +69,16 @@ public class Chatroom {
 
 	@RequestMapping("login")
 	public String login() {
-		Card card[] = new Card[2];
-		card[0] = new Card(Rank.TWO, Suit.CLUBS);
-		card[1] = new Card(Rank.TWO, Suit.CLUBS);
-		// new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(card);
-		System.out.println("json格式的牌:");
-		System.out.println(new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create().toJson(card));
 		// 跳转到login.jsp
 		return "login";
 	}
 
+	/*洗牌放在了statemManager中由房主进行洗牌*/
 	@RequestMapping("ShuffleDeck")
 	@ResponseBody
 	public String ShuffleDeck(HttpServletRequest request) throws IOException {
-		String roomName = request.getParameter("roomname");
+		//String roomName = request.getParameter("roomname");
+		String roomName="武大";
 		String userId = request.getParameter("userid");
 		deckOfCard deckofcards = new deckOfCard();
 		deckofcards.setPoker();// 按顺序初始化牌
@@ -148,10 +139,10 @@ public class Chatroom {
 			callcontract=new CallContract(Integer.parseInt(calltype),playerposition);
 		}
 		//将叫品放入callcontractList
-		socketHandler.callcontractList.add(callcontract);
+		//socketHandler.callcontractList.add(callcontract);
 		//发送该叫品显示给玩家
 		pokercommunicator.send(callcontract);
-		if(mapsessioncontroll.findendOfCall()) {
+		/*if(mapsessioncontroll.findendOfCall()) {
 			//如果出现连续三次非实质性叫品，则通知玩家叫品结束，并将最高叫品发给玩家（最后出的叫品即为最高叫品）
 			int loc=mapsessioncontroll.findHighestCall();
 			CallContract highcallcontract=socketHandler.callcontractList.get(loc);
@@ -159,7 +150,8 @@ public class Chatroom {
 			//保存定约
 			socketHandler.roomContractMap.put(roomName, highcallcontract);
 			isend="1";
-		}
+		}*/
+		isend="1";
 		return isend;
 	}
 }
