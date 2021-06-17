@@ -18,7 +18,7 @@
         <slf4j.version>1.7.7</slf4j.version>  
         <log4j.version>1.2.17</log4j.version> 
         <!-- jackson版本号 -->
-        <jackson.version>2.8.3</jackson.version> 
+        <jackson.version>2.9.10.7</jackson.version> 
     </properties> 
     <!-- 配置插件地址，因为tomcat8插件在maven官网上找不到，需要在特定地址上找 -->
   
